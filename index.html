@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Happy Birthday Love</title>
+<title>Happy Birthday</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -13,170 +13,686 @@
   --gold:#C8A84B;--gold2:#E6C96A;--muted:#6A8CB0;
   --paper:#F7F3EC;--ink:#1A2340;
 }
-html,body{width:100%;height:100%;overflow:hidden;background:var(--navy);font-family:'DM Sans',sans-serif;color:var(--white);}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);}
 
 /* ═══ PAGE SYSTEM ═══ */
 .page{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.6s ease;overflow:hidden;}
 .page.active{opacity:1;pointer-events:auto;}
 .star-field{position:absolute;inset:0;pointer-events:none;}
 
-/* ═══ P1 ENVELOPE ═══ */
-.env-scene{position:relative;width:min(460px,86vw);display:flex;flex-direction:column;align-items:center;margin-top: 100px;}
-.env-clip{position:relative;width:100%;overflow:visible;} /* Overflow visible agar kartu bisa keluar */
+/* ═══════════════════════════════
+   P1 — ENVELOPE
+   Kartu tersembunyi di dalam amplop, naik sedikit saat dibuka
+═══════════════════════════════ */
+#p-envelope{background:radial-gradient(ellipse at 40% 50%,#162847 0%,#0A1628 70%);}
 
-.env-outer{position:relative;width:100%;filter:drop-shadow(0 16px 50px rgba(0,0,0,0.7));z-index:3;}
-.env-body-wrap{position:relative;width:100%;aspect-ratio:1.62/1;}
-
-/* Lapisan 1: Bagian Belakang Amplop */
-.env-back{position:absolute;inset:0;background:#152E60;border-radius:3px;z-index:1;}
-
-/* Lapisan 2: KARTU (Terjepit) */
-.letter-card-wrap{
-  position:absolute;
-  bottom:5px;
-  left:50%;
-  transform:translateX(-50%) translateY(0);
-  width:92%;
-  z-index:2;
-  transition:transform 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+/* Wrapper utama */
+.env-scene{
+  position:relative;
+  width:min(400px,86vw);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
-/* Lapisan 3: Lipatan Depan (Menutupi Kartu) */
-.env-front-folds{position:absolute;inset:0;z-index:3;pointer-events:none;}
+/*
+  env-clip: container yang clip kartu supaya tidak kelihatan
+  sebelum dibuka. overflow:hidden = kartu tersembunyi di dalam.
+  Saat risen, overflow jadi visible agar kartu bisa keluar ke atas.
+*/
+.env-clip{
+  position:relative;
+  width:100%;
+  overflow:hidden; /* sembunyikan kartu di dalam */
+}
+.env-clip.opened{
+  overflow:visible; /* biarkan kartu keluar ke atas */
+}
+
+/*
+  Kartu: position absolute di dalam env-clip.
+  Awal: translateY(0) = tersembunyi di dalam amplop (karena overflow:hidden).
+  Risen: translateY(-55%) = naik ~55% tinggi kartu ke atas, muncul di depan amplop.
+  z-index: awalnya 2 (di atas lipatan amplop bawah, di bawah flap),
+           setelah risen jadi 10 (di depan semua).
+*/
+.letter-card-wrap{
+  position:absolute;
+  bottom:8px;        /* duduk di dalam amplop */
+  left:50%;
+  width:88%;
+  z-index:2;
+  transform:translateX(-50%) translateY(0px); /* sepenuhnya di dalam */
+  transition:transform 1.3s cubic-bezier(0.22,0.85,0.25,1);
+  pointer-events:none;
+}
+.letter-card-wrap.risen{
+  transform:translateX(-50%) translateY(-52%); /* naik 52% dari tinggi kartu */
+  z-index:10;
+  pointer-events:auto;
+}
+
+.letter-card{
+  background:#1a2740;
+  border-radius:2px;
+  padding:1.8rem 1.6rem 1.4rem;
+  text-align:center;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(168,196,232,0.12);
+  position:relative;overflow:hidden;
+}
+.letter-card::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(transparent 0,transparent 30px,rgba(168,196,232,0.07) 30px,rgba(168,196,232,0.07) 31px);top:52px;pointer-events:none;}
+.letter-card::after{content:'';position:absolute;top:0;bottom:0;left:42px;width:1.5px;background:rgba(185,65,65,0.18);pointer-events:none;}
+
+.lc-holes{position:absolute;left:9px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-evenly;padding:0.8rem 0;}
+.lc-hole{width:12px;height:12px;border-radius:50%;background:rgba(10,22,40,0.85);box-shadow:0 0 0 1.5px rgba(168,196,232,0.13);}
+
+.lc-inner{margin-left:1.6rem;position:relative;z-index:1;}
+.lc-from{font-size:0.58rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;}
+.lc-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5.5vw,2.5rem);font-weight:300;color:var(--white);line-height:1;}
+.lc-title em{font-style:italic;color:var(--ice);}
+.lc-name{font-family:'Pinyon Script',cursive;font-size:clamp(1.4rem,4vw,1.8rem);color:var(--ice);margin:0.1rem 0 0.6rem;}
+.lc-rule{height:1px;background:rgba(168,196,232,0.18);margin:0.4rem 0;}
+.lc-wish{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(0.85rem,2vw,0.96rem);color:var(--ice);line-height:1.7;margin-bottom:0.7rem;opacity:0.85;}
+.lc-btn{background:var(--blue2);color:var(--white);border:none;border-radius:2px;padding:0.55rem 1.5rem;font-family:'DM Sans',sans-serif;font-size:0.73rem;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;opacity:0;pointer-events:none;transition:opacity 0.5s,background 0.2s,transform 0.2s;}
+.lc-btn.show{opacity:1;pointer-events:auto;}
+.lc-btn:hover{background:var(--sky);transform:translateY(-1px);}
+
+/* Amplop outer */
+.env-outer{
+  position:relative;width:100%;
+  filter:drop-shadow(0 16px 50px rgba(0,0,0,0.7));
+  z-index:5;
+}
+
+.env-body-wrap{position:relative;width:100%;aspect-ratio:1.62/1;}
+.env-body{
+  position:absolute;inset:0;
+  background:linear-gradient(165deg,#1D4080 0%,#152E60 55%,#0F2248 100%);
+  border-radius:3px;
+}
+.env-body::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom right,rgba(255,255,255,0.04) 0%,transparent 50%);border-radius:3px;}
 .env-fold-l{position:absolute;top:0;left:0;bottom:0;width:50%;background:linear-gradient(to right,#122553,#1A3872);clip-path:polygon(0 0,0 100%,100% 50%);}
 .env-fold-r{position:absolute;top:0;right:0;bottom:0;width:50%;background:linear-gradient(to left,#122553,#1A3872);clip-path:polygon(100% 0,100% 100%,0 50%);}
-.env-fold-bc{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-style:solid;border-width:0 50% 40% 50%;border-color:transparent transparent #162E62 transparent;}
+.env-fold-bl{position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:0 0 42% 50%;border-color:transparent transparent #0F2040 transparent;}
+.env-fold-br{position:absolute;bottom:0;right:0;width:0;height:0;border-style:solid;border-width:0 50% 42% 0;border-color:transparent #0F2040 transparent transparent;}
+.env-fold-bc{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-style:solid;border-width:0 50% 35% 50%;border-color:transparent transparent #162E62 transparent;}
 
-/* Lapisan 4: Penutup (Flap) */
-.env-flap{position:absolute;top:0;left:0;right:0;height:56%;z-index:4;transform-origin:top center;transition:transform 0.9s ease-in;}
-.env-flap-front{position:absolute;inset:0;background:linear-gradient(160deg,#1F4490 0%,#163270 60%,#112458 100%);clip-path:polygon(0 0,100% 0,50% 96%);}
-.env-flap.opened{transform:rotateX(-180deg);z-index:1;} /* Z-index turun saat buka agar tidak menutupi kartu yang naik */
+/* Flap — berputar ke atas saat dibuka */
+.env-flap{
+  position:absolute;top:0;left:0;right:0;height:56%;
+  z-index:6;
+  transform-origin:top center;
+  transition:transform 0.9s cubic-bezier(0.4,0,0.2,1);
+  perspective:600px;
+}
+.env-flap-front{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,#1F4490 0%,#163270 60%,#112458 100%);
+  clip-path:polygon(0 0,100% 0,50% 96%);
+}
+.env-flap-front::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,0.07) 0%,transparent 60%);clip-path:polygon(0 0,100% 0,50% 96%);}
+.env-flap.opened{transform:rotateX(-185deg);}
 
-/* Card Styling */
-.letter-card{background:#1E2A42;border-radius:2px;padding:2rem 1.8rem;text-align:center;box-shadow:0 0 20px rgba(0,0,0,0.3);}
-.lc-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--white);}
-.lc-name{font-family:'Pinyon Script',cursive;font-size:1.5rem;color:var(--ice);}
-.lc-wish{font-style:italic;font-size:0.9rem;color:var(--ice);margin:1rem 0;line-height:1.5;}
-.lc-btn{background:var(--blue2);color:#fff;border:none;padding:0.6rem 1.2rem;cursor:pointer;opacity:0;transition:opacity 0.5s;}
-.lc-btn.show{opacity:1;}
+/* Wax seal — overlay di atas amplop, di luar env-clip, relatif ke env-scene */
+.wax-wrap{
+  position:absolute;
+  left:50%;
+  top:50%; /* ~tengah amplop = area flap */
+  transform:translate(-50%, -80%);
+  z-index:20;cursor:pointer;
+  transition:opacity 0.3s,transform 0.3s;
+}
+.wax-wrap:hover{transform:translate(-50%, -80%) scale(1.07);}
+.wax-wrap.gone{opacity:0;transform:translate(-50%, -80%) scale(0.6);pointer-events:none;}
 
-/* Shared Styles */
-.pg-inner{max-width:560px;width:90%;text-align:center;z-index:2;}
-.pg-title{font-family:'Cormorant Garamond',serif;font-size:3.5rem;line-height:1;}
-.nav-btn{background:transparent;border:1px solid var(--sky);padding:0.7rem 1.5rem;color:var(--ice);cursor:pointer;margin-top:20px;}
-.wax-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-42%);z-index:10;cursor:pointer;transition:0.3s;}
-.wax-wrap.gone{opacity:0;transform:translate(-50%,-42%) scale(0);pointer-events:none;}
-.env-hint{margin-top:20px;font-size:0.8rem;color:var(--muted);animation:float 3s infinite;}
+/* Hint */
+.env-hint{font-size:0.7rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-top:1.4rem;animation:float 3s ease-in-out infinite;transition:opacity 0.4s;}
+.env-hint.gone{opacity:0;}
 
+/* ═══ SHARED ═══ */
+.pg-inner{max-width:560px;width:90%;text-align:center;position:relative;z-index:2;}
+.pg-label{font-size:0.65rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;display:block;}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,8vw,5rem);font-weight:300;color:var(--white);line-height:0.95;margin-bottom:0.4rem;}
+.pg-title em{font-style:italic;color:var(--gold2);}
+.pg-script{font-family:'Pinyon Script',cursive;font-size:clamp(1.8rem,5vw,2.6rem);color:var(--ice);}
+.pg-body{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.05rem,2.8vw,1.3rem);color:var(--ice);line-height:1.85;margin:1.1rem 0;}
+.pg-sig{font-family:'Pinyon Script',cursive;font-size:clamp(1.5rem,4vw,2rem);color:var(--gold2);margin-top:1.2rem;}
+.pg-quote{position:absolute;font-family:'Cormorant Garamond',serif;font-size:16rem;line-height:1;color:var(--blue);opacity:0.15;top:-1rem;left:-1rem;pointer-events:none;z-index:0;}
+.nav-btn{background:transparent;border:1px solid rgba(184,208,238,0.28);border-radius:2px;padding:0.6rem 1.8rem;font-family:'DM Sans',sans-serif;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--ice);cursor:pointer;margin-top:1.8rem;transition:background 0.2s,border-color 0.2s,transform 0.2s;}
+.nav-btn:hover{background:rgba(74,127,212,0.12);border-color:var(--sky);transform:translateY(-2px);}
+
+/* ═══ GIFTS ═══ */
+.gifts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem 0.7rem;max-width:520px;margin:1.2rem auto 0;}
+.gift-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.gift-scene{width:86px;height:94px;position:relative;transition:transform 0.25s;}
+.gift-wrap:hover .gift-scene{transform:translateY(-6px) rotate(1deg);}
+.gift-lid{position:absolute;top:0;left:0;width:86px;height:24px;border-radius:5px 5px 0 0;z-index:3;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;transform-origin:top center;}
+.gift-wrap.opened .gift-lid{transform:translateY(-52px) rotate(-10deg);opacity:0;}
+.gift-box{position:absolute;top:19px;left:0;width:86px;height:68px;border-radius:0 0 7px 7px;z-index:2;}
+.ribbon-v{position:absolute;top:19px;left:50%;transform:translateX(-50%);width:10px;height:68px;z-index:4;border-radius:2px;transition:opacity 0.3s;}
+.ribbon-h{position:absolute;top:6px;left:0;width:86px;height:10px;z-index:4;border-radius:2px;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;transform-origin:top center;}
+.gift-wrap.opened .ribbon-h{transform:translateY(-52px) rotate(-10deg);opacity:0;}
+.gift-wrap.opened .ribbon-v{opacity:0;}
+.bow{position:absolute;top:-8px;left:50%;transform:translateX(-50%);z-index:5;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1),opacity 0.4s;transform-origin:top center;}
+.gift-wrap.opened .bow{transform:translateX(-50%) translateY(-52px) rotate(-10deg);opacity:0;}
+.gift-shine{position:absolute;top:22px;left:5px;width:16px;height:42px;border-radius:50%;background:rgba(255,255,255,0.07);z-index:5;pointer-events:none;}
+.sparkles{position:absolute;top:-8px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;}
+.spark{font-size:0.85rem;opacity:0;position:absolute;}
+.gift-wrap.opened .spark{animation:sparkPop 0.7s ease forwards;}
+.gift-wrap.opened .spark:nth-child(1){animation-delay:0s;--tx:-22px;--ty:-30px}
+.gift-wrap.opened .spark:nth-child(2){animation-delay:.06s;--tx:22px;--ty:-40px}
+.gift-wrap.opened .spark:nth-child(3){animation-delay:.12s;--tx:-5px;--ty:-48px}
+.gift-wrap.opened .spark:nth-child(4){animation-delay:.08s;--tx:15px;--ty:-26px}
+.wish-reveal{margin-top:0.5rem;background:rgba(74,127,212,0.1);border:1px solid rgba(74,127,212,0.2);border-radius:7px;padding:0.65rem 0.5rem;width:100%;max-width:135px;text-align:center;max-height:0;overflow:hidden;opacity:0;transform:translateY(-6px);transition:max-height 0.5s cubic-bezier(0.34,1.2,0.64,1),opacity 0.4s ease 0.2s,transform 0.4s ease 0.2s;pointer-events:none;}
+.gift-wrap.opened .wish-reveal{max-height:160px;opacity:1;transform:translateY(0);pointer-events:auto;}
+.wish-icon{font-size:1.1rem;display:block;margin-bottom:0.25rem;}
+.wish-title{font-family:'Cormorant Garamond',serif;font-size:0.82rem;font-weight:600;color:var(--white);margin-bottom:0.2rem;}
+.wish-text{font-size:0.67rem;line-height:1.45;color:var(--ice);font-style:italic;}
+.click-hint{font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(168,196,232,0.28);margin-top:0.35rem;transition:opacity 0.3s;}
+.gift-wrap.opened .click-hint{opacity:0;}
+.g1 .gift-box{background:#1E3A6E}.g1 .gift-lid{background:#162847}.g1 .ribbon-v,.g1 .ribbon-h{background:#C9A84C}
+.g2 .gift-box{background:#2952A3}.g2 .gift-lid{background:#1E3A6E}.g2 .ribbon-v,.g2 .ribbon-h{background:#B8D0EE}
+.g3 .gift-box{background:#162847}.g3 .gift-lid{background:#0F1F3D}.g3 .ribbon-v,.g3 .ribbon-h{background:#4A7FD4}
+.g4 .gift-box{background:#4A7FD4}.g4 .gift-lid{background:#2952A3}.g4 .ribbon-v,.g4 .ribbon-h{background:#E6C96A}
+.g5 .gift-box{background:#0F1F3D}.g5 .gift-lid{background:#0A1628}.g5 .ribbon-v,.g5 .ribbon-h{background:#C9A84C}
+.g6 .gift-box{background:#2952A3}.g6 .gift-lid{background:#162847}.g6 .ribbon-v,.g6 .ribbon-h{background:#B8D0EE}
+.g1 .bow-fill{fill:#C9A84C}.g1 .bow-center{fill:#A8862E}
+.g2 .bow-fill{fill:#B8D0EE}.g2 .bow-center{fill:#7A9CC4}
+.g3 .bow-fill{fill:#4A7FD4}.g3 .bow-center{fill:#2952A3}
+.g4 .bow-fill{fill:#E6C96A}.g4 .bow-center{fill:#C9A84C}
+.g5 .bow-fill{fill:#C9A84C}.g5 .bow-center{fill:#A8862E}
+.g6 .bow-fill{fill:#B8D0EE}.g6 .bow-center{fill:#7A9CC4}
+.reset-link{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;display:block;margin:0.4rem auto 0;}
+
+/* ═══ PHOTOBOOTH ═══ */
+.booth-wrap{display:flex;flex-direction:column;align-items:center;margin-top:1.2rem;}
+.printer{width:210px;height:54px;background:linear-gradient(to bottom,#1A2848,#121E3C);border-radius:11px;box-shadow:0 5px 18px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;position:relative;z-index:5;}
+.printer-slot{width:155px;height:6px;background:#050D1C;border-radius:3px;box-shadow:inset 0 2px 5px rgba(0,0,0,0.9);}
+.printer-led{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--sky);box-shadow:0 0 7px var(--sky);animation:ledBlink 2s ease-in-out infinite;}
+.film-output{width:182px;max-height:0;overflow:hidden;background:#0A0A0A;border-radius:0 0 4px 4px;position:relative;z-index:4;}
+.film-strip{width:182px;background:#0A0A0A;position:relative;}
+.film-strip::before,.film-strip::after{content:'';position:absolute;top:0;bottom:0;width:8px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 5px,#060606 5px,#060606 10px,transparent 10px,transparent 16px);z-index:5;}
+.film-strip::before{left:0}.film-strip::after{right:0}
+.film-frame{width:calc(100% - 16px);margin:0 8px 3px;aspect-ratio:4/3;overflow:hidden;border:1.5px solid #141414;}
+.film-frame:first-child{margin-top:3px;}
+.frame-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:center;padding:0.4rem;}
+.fp1{background:linear-gradient(135deg,#1E3A6E,#0A1628)}
+.fp2{background:linear-gradient(135deg,#162847,#1E3A6E)}
+.fp3{background:linear-gradient(135deg,#0F1F3D,#2952A3)}
+.fp4{background:linear-gradient(135deg,#162847,#0A1628)}
+.film-foot{padding:5px 8px 7px;display:flex;justify-content:space-between;align-items:center;}
+.film-foot-label{font-family:'DM Sans',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.3);letter-spacing:0.08em;}
+.film-foot-stamp{font-family:'Pinyon Script',cursive;font-size:1rem;color:var(--gold);transform:rotate(-5deg);}
+.print-btn{margin-top:0.9rem;background:transparent;border:1px solid rgba(184,208,238,0.22);border-radius:2px;padding:0.5rem 1.4rem;font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.print-btn:hover{border-color:var(--sky);color:var(--ice);}
+
+/* ═══ CAKE ═══ */
+.cake-wrap{cursor:pointer;display:inline-block;filter:drop-shadow(0 8px 28px rgba(74,127,212,0.22));transition:transform 0.2s,filter 0.2s;margin:1.2rem 0 0.4rem;}
+.cake-wrap:hover{transform:scale(1.05);}
+.cake-msg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--muted);min-height:1.6rem;transition:opacity 0.4s;}
+
+/* ═══ DATE ═══ */
+.date-card{background:var(--paper);border-radius:3px;max-width:440px;width:90%;padding:2.2rem 1.8rem;box-shadow:0 20px 60px rgba(0,0,0,0.55);position:relative;overflow:hidden;text-align:center;}
+.date-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:repeating-linear-gradient(90deg,#fff 0,#fff 10px,#E8EEF8 10px,#E8EEF8 12px);}
+.date-card::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(transparent 0,transparent 30px,#E8DFC4 30px,#E8DFC4 31px);top:48px;pointer-events:none;opacity:0.35;}
+.dc-inner{position:relative;z-index:1;}
+.dc-label{font-size:0.62rem;letter-spacing:0.3em;text-transform:uppercase;color:#8090A8;margin-bottom:0.3rem;}
+.dc-q{font-family:'Pinyon Script',cursive;font-size:clamp(2.6rem,7vw,3.6rem);color:var(--blue);line-height:1.1;margin-bottom:0.3rem;}
+.dc-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.95rem;color:#5A6A88;margin-bottom:1rem;}
+.dc-dress{margin:0.8rem 0;padding:1rem 0.8rem;background:rgba(255,255,255,0.65);border:1px dashed #C4CEDC;border-radius:3px;}
+.dc-dress-lbl{font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:#8090A8;margin-bottom:0.6rem;}
+.dc-outfits{display:flex;justify-content:center;gap:1.8rem;margin-bottom:0.6rem;}
+.outfit{display:flex;flex-direction:column;align-items:center;gap:0.25rem;}
+.outfit-lbl{font-family:'DM Sans',sans-serif;font-size:0.6rem;color:#8090A8;letter-spacing:0.08em;}
+.dc-code{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--ink);letter-spacing:0.15em;}
+.dc-age{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:#6A7A98;margin:0.6rem 0 0.8rem;}
+.dc-choices{display:flex;justify-content:center;gap:0.8rem;margin:0.4rem 0 0.7rem;}
+.dc-btn{font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;padding:0.5rem 1.6rem;border-radius:2px;cursor:pointer;transition:all 0.2s;border:1.5px solid;}
+.dc-y1{background:var(--ink);color:var(--white);border-color:var(--ink);}
+.dc-y2{background:var(--blue2);color:var(--white);border-color:var(--blue2);}
+.dc-y1:hover{background:var(--blue)}.dc-y2:hover{background:var(--sky)}
+.dc-reply{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:var(--blue2);min-height:1.4rem;transition:opacity 0.4s;}
+
+/* ═══ CLOSE ═══ */
+.close-env{position:relative;width:min(380px,80vw);margin:0 auto;cursor:pointer;}
+.close-env-body{width:100%;aspect-ratio:1.62/1;background:linear-gradient(165deg,#1D4080,#0F2248);border-radius:3px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);transition:transform 0.3s;}
+.close-env-body:hover{transform:translateY(-3px);}
+.cfl{position:absolute;top:0;left:0;bottom:0;width:50%;background:linear-gradient(to right,#122553,#1A3872);clip-path:polygon(0 0,0 100%,100% 50%);}
+.cfr{position:absolute;top:0;right:0;bottom:0;width:50%;background:linear-gradient(to left,#122553,#1A3872);clip-path:polygon(100% 0,100% 100%,0 50%);}
+.cfb{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,#112045,#162E62);clip-path:polygon(0 100%,100% 100%,50% 0);}
+.close-flap{position:absolute;top:0;left:0;right:0;height:56%;background:linear-gradient(160deg,#1F4490,#163270);clip-path:polygon(0 0,100% 0,50% 96%);transform-origin:top center;transform:rotateX(-185deg);transition:transform 1s cubic-bezier(0.4,0,0.2,1);z-index:5;}
+.close-env.sealing .close-flap{transform:rotateX(0deg);}
+.close-seal-wrap{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);z-index:6;opacity:0;transition:opacity 0.5s 0.8s;}
+.close-env.sealing .close-seal-wrap{opacity:1;}
+.close-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--muted);margin-top:1.5rem;text-align:center;transition:opacity 0.4s;}
+
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
+
+/* ═══ KEYFRAMES ═══ */
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-@keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(0.4)}50%{opacity:var(--op,.4);transform:scale(1)}}
+@keyframes ledBlink{0%,100%{opacity:1}50%{opacity:0.15}}
+@keyframes sparkPop{0%{opacity:0;transform:translate(0,0) scale(0.3)}45%{opacity:1;transform:translate(var(--tx),var(--ty)) scale(1.2)}100%{opacity:0;transform:translate(var(--tx),calc(var(--ty) - 9px)) scale(0.5)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.14)}100%{transform:scale(1)}}
+.pop-anim{animation:pop 0.32s ease}
 </style>
 </head>
 <body>
+<canvas id="confetti-canvas"></canvas>
 
+<!-- ═══ P1 ENVELOPE ═══ -->
 <div class="page active" id="p-envelope">
   <div class="star-field" id="sf1"></div>
-  <div class="env-scene">
-    <div class="env-clip">
-      
+
+  <div class="env-scene" id="envScene">
+
+    <!-- env-clip: overflow:hidden menyembunyikan kartu di dalam amplop -->
+    <div class="env-clip" id="envClip">
+
+      <!-- KARTU: tersembunyi di dalam, naik saat dibuka -->
+      <div class="letter-card-wrap" id="letterCard">
+        <div class="letter-card">
+          <div class="lc-holes">
+            <div class="lc-hole"></div><div class="lc-hole"></div>
+            <div class="lc-hole"></div><div class="lc-hole"></div>
+          </div>
+          <div class="lc-inner">
+            <p class="lc-from">To the one I love most</p>
+            <p class="lc-title">Happy <em>Birthday</em></p>
+            <p class="lc-name">my love</p>
+            <div class="lc-rule"></div>
+            <p class="lc-wish">
+              May this year carry you gently —<br>
+              full of peace, warmth, and<br>
+              everything you deserve.
+            </p>
+            <button class="lc-btn" id="lcBtn" onclick="goTo('p-hero')">Open my letter</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AMPLOP: z-index lebih tinggi dari kartu (sebelum risen) -->
       <div class="env-outer" id="envOuter">
         <div class="env-body-wrap">
-          
-          <div class="env-back"></div>
-
-          <div class="letter-card-wrap" id="letterCard">
-            <div class="letter-card">
-              <p style="font-size:0.6rem; letter-spacing:2px; color:var(--muted)">PRIVATE LETTER</p>
-              <h2 class="lc-title">Happy Birthday</h2>
-              <p class="lc-name">my love</p>
-              <p class="lc-wish">May this year carry you gently — full of peace, warmth, and everything you deserve.</p>
-              <button class="lc-btn" id="lcBtn" onclick="goTo('p-hero')">Read Full Note</button>
-            </div>
-          </div>
-
-          <div class="env-front-folds">
-            <div class="env-fold-l"></div>
-            <div class="env-fold-r"></div>
+          <div class="env-body">
+            <div class="env-fold-l"></div><div class="env-fold-r"></div>
+            <div class="env-fold-bl"></div><div class="env-fold-br"></div>
             <div class="env-fold-bc"></div>
           </div>
-
           <div class="env-flap" id="envFlap">
             <div class="env-flap-front"></div>
           </div>
         </div>
+      </div>
 
-        <div class="wax-wrap" id="waxSeal" onclick="openEnvelope()">
-          <svg width="70" height="70" viewBox="0 0 82 82">
-            <circle cx="41" cy="41" r="33" fill="#BE3535"/>
-            <path d="M41 54C41 54 24 43 24 32C24 25.5 30 21 36.5 23.5C39 24.5 40.5 27.5 41 29.5C41.5 27.5 43 24.5 45.5 23.5C52 21 58 25.5 58 32C58 43 41 54 41 54Z" fill="#D45050"/>
+    </div><!-- end env-clip -->
+
+    <!-- Wax seal: di luar env-clip agar tidak ikut ter-clip -->
+    <div class="wax-wrap" id="waxSeal" onclick="openEnvelope()">
+      <svg width="80" height="80" viewBox="0 0 82 82">
+        <circle cx="41" cy="41" r="38" fill="#AA2E2E" opacity="0.22"/>
+        <circle cx="41" cy="41" r="33" fill="#BE3535"/>
+        <circle cx="41" cy="41" r="27" fill="#A82828"/>
+        <circle cx="41" cy="41" r="21" fill="#BE3535"/>
+        <circle cx="41" cy="41" r="15" fill="#A82828" opacity="0.8"/>
+        <path d="M41 54C41 54 24 43 24 32C24 25.5 30 21 36.5 23.5C39 24.5 40.5 27.5 41 29.5C41.5 27.5 43 24.5 45.5 23.5C52 21 58 25.5 58 32C58 43 41 54 41 54Z" fill="#D45050"/>
+        <path d="M41 49C41 49 28 40 28 32C28 27.5 31.5 25 36 27C38.5 28 40 31 41 33C42 31 43.5 28 46 27C50.5 25 54 27.5 54 32C54 40 41 49 41 49Z" fill="#E07070"/>
+        <ellipse cx="31" cy="28" rx="3" ry="1.8" fill="rgba(255,200,200,0.3)" transform="rotate(-30 31 28)"/>
+      </svg>
+    </div>
+
+  </div><!-- end env-scene -->
+
+  <p class="env-hint" id="envHint">tap to open</p>
+</div>
+
+<!-- ═══ P2 HERO ═══ -->
+<div class="page" id="p-hero" style="background:radial-gradient(ellipse at 40% 45%,#162847 0%,#0A1628 68%);">
+  <div class="star-field" id="sf2"></div>
+  <div class="pg-inner">
+    <span class="pg-label">just for you</span>
+    <p class="pg-title">Happy<br><em>Birthday</em></p>
+    <p class="pg-script" style="margin-top:0.4rem;">my love</p>
+    <div id="heroCandles" style="margin:1.5rem 0;display:flex;gap:0.9rem;justify-content:center;"></div>
+    <button class="nav-btn" onclick="goTo('p-letter')">A little note</button>
+  </div>
+</div>
+
+<!-- ═══ P3 LETTER ═══ -->
+<div class="page" id="p-letter" style="background:var(--navy);">
+  <div class="star-field" id="sf3"></div>
+  <div class="pg-inner" style="text-align:left;position:relative;">
+    <div class="pg-quote">"</div>
+    <span class="pg-label">a little note</span>
+    <h2 class="pg-title" style="font-size:clamp(2rem,5vw,3rem);">From my heart<br>to <em>yours</em></h2>
+    <p class="pg-body">On this special day, I want you to know<br>how much brighter my world is with you in it.<br>You are the reason I smile at nothing —<br>thank you for being exactly who you are.</p>
+    <p class="pg-sig">— Always yours</p>
+    <button class="nav-btn" onclick="goTo('p-wishes')">I have wishes for you</button>
+  </div>
+</div>
+
+<!-- ═══ P4 WISHES ═══ -->
+<div class="page" id="p-wishes" style="background:var(--navy2);">
+  <div style="text-align:center;max-width:580px;width:90%;position:relative;z-index:2;">
+    <span class="pg-label">for you, today</span>
+    <h2 class="pg-title" style="font-size:clamp(1.8rem,5vw,2.8rem);">All the things I'm<br><em>wishing</em> for you</h2>
+    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--muted);margin-top:0.3rem;">tap each gift to unwrap</p>
+    <div class="gifts-grid" id="giftsGrid"></div>
+    <button class="reset-link" onclick="resetGifts()">wrap them back up</button>
+    <button class="nav-btn" onclick="goTo('p-booth')">Our little moments</button>
+  </div>
+</div>
+
+<!-- ═══ P5 PHOTOBOOTH ═══ -->
+<div class="page" id="p-booth" style="background:var(--navy2);">
+  <div style="text-align:center;max-width:480px;width:90%;z-index:2;">
+    <span class="pg-label">our little moments</span>
+    <h2 class="pg-title" style="font-size:clamp(1.8rem,5vw,2.8rem);">The <em>photobooth</em></h2>
+    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:var(--muted);margin-top:0.25rem;">I'm really glad you exist and came into my life</p>
+    <div class="booth-wrap">
+      <div class="printer">
+        <div class="printer-slot"></div>
+        <div class="printer-led"></div>
+      </div>
+      <div class="film-output" id="filmOutput">
+        <div class="film-strip" id="filmStrip">
+          <div class="film-frame"><div class="frame-ph fp1">add your photo</div></div>
+          <div class="film-frame"><div class="frame-ph fp2">add your photo</div></div>
+          <div class="film-frame"><div class="frame-ph fp3">add your photo</div></div>
+          <div class="film-frame"><div class="frame-ph fp4">add your photo</div></div>
+          <div class="film-foot">
+            <span class="film-foot-label">PHOTO DUMP</span>
+            <span class="film-foot-stamp">us</span>
+          </div>
+        </div>
+      </div>
+      <button class="print-btn" id="printBtn" onclick="printFilm()">print photos</button>
+    </div>
+    <button class="nav-btn" onclick="goTo('p-cake')" style="margin-top:0.8rem;">Make a wish</button>
+  </div>
+</div>
+
+<!-- ═══ P6 CAKE ═══ -->
+<div class="page" id="p-cake" style="background:var(--navy);">
+  <div class="star-field" id="sf4"></div>
+  <div class="pg-inner">
+    <span class="pg-label">make a wish</span>
+    <h2 class="pg-title" style="font-size:clamp(2rem,6vw,3.2rem);">Blow out<br>the <em>candles</em></h2>
+    <div class="cake-wrap" id="cakeBtn" onclick="blowCandles()">
+      <svg width="210" height="230" viewBox="0 0 210 230">
+        <ellipse cx="105" cy="216" rx="84" ry="9" fill="#000" opacity="0.18"/>
+        <rect x="12" y="138" width="186" height="62" rx="9" fill="#1E3A6E"/>
+        <rect x="12" y="132" width="186" height="14" rx="5" fill="#EEF4FF"/>
+        <ellipse cx="34" cy="139" rx="9" ry="6" fill="#EEF4FF"/><ellipse cx="62" cy="136" rx="10" ry="6" fill="#EEF4FF"/>
+        <ellipse cx="93" cy="134" rx="11" ry="6" fill="#EEF4FF"/><ellipse cx="123" cy="134" rx="11" ry="6" fill="#EEF4FF"/>
+        <ellipse cx="152" cy="136" rx="10" ry="6" fill="#EEF4FF"/><ellipse cx="180" cy="139" rx="9" ry="6" fill="#EEF4FF"/>
+        <rect x="27" y="88" width="156" height="52" rx="8" fill="#2952A3"/>
+        <rect x="27" y="82" width="156" height="13" rx="5" fill="#EEF4FF"/>
+        <ellipse cx="49" cy="89" rx="8" ry="5" fill="#EEF4FF"/><ellipse cx="77" cy="87" rx="9" ry="5" fill="#EEF4FF"/>
+        <ellipse cx="105" cy="85" rx="10" ry="5" fill="#EEF4FF"/><ellipse cx="133" cy="87" rx="9" ry="5" fill="#EEF4FF"/>
+        <ellipse cx="161" cy="89" rx="8" ry="5" fill="#EEF4FF"/>
+        <rect x="48" y="50" width="114" height="40" rx="7" fill="#162847"/>
+        <rect x="48" y="44" width="114" height="12" rx="4" fill="#EEF4FF"/>
+        <ellipse cx="66" cy="51" rx="7" ry="4" fill="#EEF4FF"/><ellipse cx="92" cy="49" rx="8" ry="4" fill="#EEF4FF"/>
+        <ellipse cx="118" cy="49" rx="8" ry="4" fill="#EEF4FF"/><ellipse cx="144" cy="51" rx="7" ry="4" fill="#EEF4FF"/>
+        <rect x="77" y="26" width="9" height="26" rx="2.5" fill="#4A7FD4"/>
+        <rect x="100" y="22" width="9" height="26" rx="2.5" fill="#C9A84C"/>
+        <rect x="123" y="26" width="9" height="26" rx="2.5" fill="#4A7FD4"/>
+        <g id="fl1"><ellipse cx="81.5" cy="22" rx="5" ry="7.5" fill="#FFE566" opacity="0.95"/><ellipse cx="81.5" cy="23" rx="2.5" ry="4.5" fill="#FF9500"/></g>
+        <g id="fl2"><ellipse cx="104.5" cy="17" rx="5.5" ry="8" fill="#FFE566" opacity="0.95"/><ellipse cx="104.5" cy="18" rx="2.8" ry="5" fill="#FF9500"/></g>
+        <g id="fl3"><ellipse cx="127.5" cy="22" rx="5" ry="7.5" fill="#FFE566" opacity="0.95"/><ellipse cx="127.5" cy="23" rx="2.5" ry="4.5" fill="#FF9500"/></g>
+      </svg>
+    </div>
+    <p class="cake-msg" id="cakeMsg">tap to blow out the candles</p>
+    <button class="nav-btn" id="cakeNext" onclick="goTo('p-date')" style="opacity:0;pointer-events:none;transition:opacity 0.5s;">One more thing</button>
+  </div>
+</div>
+
+<!-- ═══ P7 DATE ═══ -->
+<div class="page" id="p-date" style="background:var(--navy);">
+  <div class="star-field" id="sf5"></div>
+  <div class="date-card">
+    <div class="dc-inner">
+      <p class="dc-label">will you be my</p>
+      <p class="dc-q">Date?</p>
+      <p class="dc-sub">after office hours — just us</p>
+      <div class="dc-dress">
+        <p class="dc-dress-lbl">dress code</p>
+        <div class="dc-outfits">
+          <div class="outfit">
+            <svg width="48" height="66" viewBox="0 0 48 66">
+              <circle cx="24" cy="7" r="6.5" fill="#DCCBB0"/>
+              <path d="M14 20L8 62L40 62L34 20C31 22.5 27.5 24 24 24C20.5 24 17 22.5 14 20Z" fill="#F2F5FF"/>
+              <path d="M16 17C18 21.5 21 23.5 24 23.5C27 23.5 30 21.5 32 17L30 15L24 18L18 15Z" fill="#E4EBFF"/>
+              <path d="M16 17L8 26L12 28L18 20Z" fill="#F2F5FF"/>
+              <path d="M32 17L40 26L36 28L30 20Z" fill="#F2F5FF"/>
+              <line x1="15" y1="35" x2="33" y2="35" stroke="#CBD6EE" stroke-width="1"/>
+            </svg>
+            <span class="outfit-lbl">her</span>
+          </div>
+          <div class="outfit">
+            <svg width="48" height="66" viewBox="0 0 48 66">
+              <circle cx="24" cy="7" r="6.5" fill="#DCCBB0"/>
+              <rect x="15" y="17" width="18" height="36" rx="2" fill="#F5F5FF"/>
+              <path d="M15 17L7 58L19 58L19 27L15 17Z" fill="#EBEBFF"/>
+              <path d="M33 17L41 58L29 58L29 27L33 17Z" fill="#EBEBFF"/>
+              <path d="M15 17L21 29L24 25L24 17Z" fill="#DDDDF5"/>
+              <path d="M33 17L27 29L24 25L24 17Z" fill="#DDDDF5"/>
+              <path d="M22 19L24 36L26 19L25.2 17L22.8 17Z" fill="#C8D8F0"/>
+              <rect x="15" y="54" width="8" height="12" rx="1" fill="#E5E5F8"/>
+              <rect x="25" y="54" width="8" height="12" rx="1" fill="#E5E5F8"/>
+            </svg>
+            <span class="outfit-lbl">him</span>
+          </div>
+        </div>
+        <p class="dc-code">ALL WHITE</p>
+      </div>
+      <p class="dc-age">celebrating 26 years of you</p>
+      <div class="dc-choices">
+        <button class="dc-btn dc-y1" onclick="dateAnswer('yes')">Yes</button>
+        <button class="dc-btn dc-y2" onclick="dateAnswer('yes2')">Yes!</button>
+      </div>
+      <p class="dc-reply" id="dateReply"></p>
+    </div>
+  </div>
+  <button class="nav-btn" id="dateNext" onclick="goTo('p-close')" style="opacity:0;pointer-events:none;transition:opacity 0.5s;margin-top:1.2rem;">Close the letter</button>
+</div>
+
+<!-- ═══ P8 CLOSE ═══ -->
+<div class="page" id="p-close" style="background:var(--navy);">
+  <div class="star-field" id="sf6"></div>
+  <div style="text-align:center;z-index:2;">
+    <p class="pg-sig" style="font-size:1.6rem;margin-bottom:1.4rem;">Happy Birthday, love.</p>
+    <div class="close-env" id="closeEnv" onclick="sealLetter()">
+      <div class="close-env-body">
+        <div class="cfl"></div><div class="cfr"></div><div class="cfb"></div>
+        <div class="close-flap"></div>
+        <div class="close-seal-wrap">
+          <svg width="56" height="56" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="26" fill="#BE3535"/>
+            <circle cx="28" cy="28" r="20" fill="#A82828"/>
+            <circle cx="28" cy="28" r="14" fill="#BE3535"/>
+            <path d="M28 38C28 38 17 30 17 22C17 17 21 14 25 16C27 17 28 20 28 20C28 20 29 17 31 16C35 14 39 17 39 22C39 30 28 38 28 38Z" fill="#E07070"/>
           </svg>
         </div>
       </div>
     </div>
-    <p class="env-hint" id="envHint">Tap to open</p>
-  </div>
-</div>
-
-<div class="page" id="p-hero">
-  <div class="star-field" id="sf2"></div>
-  <div class="pg-inner">
-    <p class="pg-title">Happy<br><i style="color:var(--gold2)">Birthday</i></p>
-    <p style="font-family:'Pinyon Script'; font-size:2rem; color:var(--ice)">my love</p>
-    <button class="nav-btn" onclick="goTo('p-letter')">Next</button>
-  </div>
-</div>
-
-<div class="page" id="p-letter">
-  <div class="pg-inner">
-    <h2 class="pg-title">From my heart</h2>
-    <p style="font-style:italic; margin:20px 0; color:var(--ice)">
-      On this special day, I want you to know how much brighter my world is with you in it.
-    </p>
-    <button class="nav-btn" onclick="location.reload()">Replay</button>
+    <p class="close-text" id="closeText">tap to seal with love</p>
   </div>
 </div>
 
 <script>
-/* Stars */
-function makeStars(id){
-  const c=document.getElementById(id);
-  for(let i=0;i<40;i++){
+/* ── Stars ── */
+function makeStars(id,n){
+  const c=document.getElementById(id);if(!c)return;
+  for(let i=0;i<n;i++){
     const s=document.createElement('div');
-    s.style.cssText=`position:absolute;background:#fff;width:2px;height:2px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation:twinkle ${2+Math.random()*3}s infinite;opacity:${Math.random()}`;
+    const sz=0.8+Math.random()*2;
+    s.style.cssText=`position:absolute;border-radius:50%;background:#fff;width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation:twinkle ${2.5+Math.random()*4}s ${Math.random()*4}s ease-in-out infinite;--op:${0.15+Math.random()*0.45};`;
     c.appendChild(s);
   }
 }
-makeStars('sf1'); makeStars('sf2');
+['sf1','sf2','sf3','sf4','sf5','sf6'].forEach(id=>makeStars(id,50));
 
-/* Navigation */
+/* ── Navigation ── */
 function goTo(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-/* Open Envelope Logic */
+/* ── Hero candles ── */
+(function(){
+  const w=document.getElementById('heroCandles');if(!w)return;
+  for(let i=0;i<5;i++){
+    const d=1.3+i*0.15;
+    w.innerHTML+=`<div style="display:flex;flex-direction:column;align-items:center;"><div style="width:9px;height:15px;background:radial-gradient(ellipse at bottom,#FFE566,#FF9500,#FF4500);border-radius:50% 50% 28% 28%;animation:float ${d}s ease-in-out infinite alternate;margin-bottom:-1px;"></div><div style="width:10px;height:30px;background:linear-gradient(to right,#C9A84C,#E6C96A,#C9A84C);border-radius:2px;"></div></div>`;
+  }
+})();
+
+/* ═══════════════════════════════════════
+   ENVELOPE ANIMATION
+   
+   env-clip overflow:hidden → kartu tersembunyi di dalam
+   Saat dibuka:
+   1. Seal hilang, flap terbuka
+   2. env-clip overflow → visible
+   3. Kartu naik translateY(-52%) → separuh kartu keluar ke atas amplop
+   4. Tombol muncul
+═══════════════════════════════════════ */
 let envDone = false;
+
 function openEnvelope(){
   if(envDone) return;
   envDone = true;
 
-  // 1. Buka Flap & Hilangkan Seal
-  document.getElementById('envFlap').classList.add('opened');
-  document.getElementById('waxSeal').classList.add('gone');
-  document.getElementById('envHint').style.opacity = '0';
-
+  const clip = document.getElementById('envClip');
   const card = document.getElementById('letterCard');
 
-  // 2. Kartu Meluncur Keluar (Naik)
-  setTimeout(() => {
-    // -320px akan menarik kartu keluar dari sela-sela lipatan ke atas
-    card.style.transform = 'translateX(-50%) translateY(-320px)';
-  }, 800);
+  // Sembunyikan seal & hint
+  document.getElementById('waxSeal').classList.add('gone');
+  document.getElementById('envHint').classList.add('gone');
 
-  // 3. Munculkan Tombol di Dalam Kartu
-  setTimeout(() => {
-    document.getElementById('lcBtn').classList.add('show');
-  }, 2000);
+  // Buka flap
+  setTimeout(()=>{ document.getElementById('envFlap').classList.add('opened'); }, 100);
+
+  // Buka overflow supaya kartu bisa muncul ke atas
+  setTimeout(()=>{ clip.classList.add('opened'); }, 500);
+
+  // Naikkan kartu
+  setTimeout(()=>{ card.classList.add('risen'); }, 600);
+
+  // Tombol muncul
+  setTimeout(()=>{ document.getElementById('lcBtn').classList.add('show'); }, 1800);
+}
+
+/* ── Gifts ── */
+const wishes=[
+  {icon:"☕",title:"Slow mornings",text:"Warm drinks, soft light, nowhere to rush.",sparks:["·","✦","·","✦"]},
+  {icon:"🌊",title:"Peace of mind",text:"A year that feels lighter, gentler.",sparks:["✦","·","✦","·"]},
+  {icon:"✦",title:"Surprises",text:"The good kind — little moments of wonder.",sparks:["·","✦","·","✦"]},
+  {icon:"🫂",title:"Big hugs",text:"From me, and all who are lucky to know you.",sparks:["✦","·","✦","·"]},
+  {icon:"🌙",title:"Cozy nights",text:"Blankets, good talks, and my shoulder.",sparks:["·","✦","·","✦"]},
+  {icon:"🌅",title:"Adventures",text:"Beautiful places and stories for years.",sparks:["✦","·","✦","·"]},
+];
+const gC=["g1","g2","g3","g4","g5","g6"];
+function bowSVG(){return`<svg width="28" height="19" viewBox="0 0 36 25"><ellipse class="bow-fill" cx="10" cy="12" rx="9" ry="6" transform="rotate(-20 10 12)"/><ellipse class="bow-fill" cx="26" cy="12" rx="9" ry="6" transform="rotate(20 26 12)"/><circle class="bow-center" cx="18" cy="12" r="4"/><line x1="18" y1="15" x2="13" y2="25" stroke-width="2" stroke-linecap="round" stroke="currentColor" class="bow-fill"/><line x1="18" y1="15" x2="23" y2="25" stroke-width="2" stroke-linecap="round" stroke="currentColor" class="bow-fill"/></svg>`;}
+function buildGift(w,i){
+  const sp=w.sparks.map(s=>`<span class="spark">${s}</span>`).join('');
+  return`<div class="gift-wrap ${gC[i]}" id="gift${i}" onclick="openGift(${i})"><div class="gift-scene"><div class="sparkles">${sp}</div><div class="bow">${bowSVG()}</div><div class="ribbon-h"></div><div class="gift-lid"></div><div class="gift-box"></div><div class="ribbon-v"></div><div class="gift-shine"></div></div><p class="click-hint">tap</p><div class="wish-reveal"><span class="wish-icon">${w.icon}</span><p class="wish-title">${w.title}</p><p class="wish-text">${w.text}</p></div></div>`;
+}
+document.getElementById('giftsGrid').innerHTML=wishes.map((w,i)=>buildGift(w,i)).join('');
+function openGift(i){const el=document.getElementById('gift'+i);if(!el.classList.contains('opened'))el.classList.add('opened');}
+function resetGifts(){wishes.forEach((_,i)=>document.getElementById('gift'+i).classList.remove('opened'));}
+
+/* ── Photobooth ── */
+let printed=false;
+function printFilm(){
+  if(printed)return; printed=true;
+  const output=document.getElementById('filmOutput');
+  const strip=document.getElementById('filmStrip');
+  const btn=document.getElementById('printBtn');
+  btn.textContent='printing...';btn.style.opacity='0.4';btn.style.cursor='default';
+  const totalH=strip.offsetHeight;
+  const frameH=totalH/5;
+  const steps=[frameH,frameH*2,frameH*3,frameH*4,totalH];
+  let si=0;
+  function feedNext(){
+    if(si>=steps.length)return;
+    output.style.transition=`max-height 1.8s cubic-bezier(0.25,0.6,0.25,1)`;
+    output.style.maxHeight=steps[si]+'px';
+    si++;
+    if(si<steps.length)setTimeout(feedNext,2200);
+  }
+  setTimeout(feedNext,300);
+}
+
+/* ── Cake ── */
+const cmsgs=["Make a wish","Wish sent","The stars heard you","Happy Birthday, love"];
+let blown=false,ci=0;
+function blowCandles(){
+  const btn=document.getElementById('cakeBtn');
+  btn.classList.add('pop-anim');setTimeout(()=>btn.classList.remove('pop-anim'),350);
+  if(!blown){
+    ['fl1','fl2','fl3'].forEach(id=>document.getElementById(id).style.display='none');
+    blown=true;launchConfetti();
+    const nx=document.getElementById('cakeNext');nx.style.opacity='1';nx.style.pointerEvents='auto';
+  } else {
+    ['fl1','fl2','fl3'].forEach(id=>document.getElementById(id).style.display='');blown=false;
+  }
+  ci=(ci+1)%cmsgs.length;
+  const el=document.getElementById('cakeMsg');el.style.opacity=0;
+  setTimeout(()=>{el.textContent=cmsgs[ci];el.style.opacity=1;},250);
+}
+
+/* ── Date ── */
+function dateAnswer(v){
+  const r=document.getElementById('dateReply');
+  const nx=document.getElementById('dateNext');
+  r.style.opacity=0;
+  setTimeout(()=>{
+    r.textContent=v==='yes2'?"That's exactly what I was hoping for.":"Perfect. I'll plan everything.";
+    r.style.opacity=1;
+  },200);
+  setTimeout(()=>{nx.style.opacity='1';nx.style.pointerEvents='auto';},650);
+}
+
+/* ── Close envelope ── */
+let sealed=false;
+function sealLetter(){
+  if(sealed)return;sealed=true;
+  document.getElementById('closeEnv').classList.add('sealing');
+  setTimeout(()=>{document.getElementById('closeText').textContent='sealed with love ♡';},900);
+}
+
+/* ── Confetti ── */
+function launchConfetti(){
+  const c=document.getElementById('confetti-canvas');
+  const ctx=c.getContext('2d');
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  const cols=['#1E3A6E','#4A7FD4','#B8D0EE','#C9A84C','#E6C96A','#2952A3','#ffffff'];
+  const ps=Array.from({length:110},()=>({
+    x:Math.random()*c.width,y:-10-Math.random()*60,
+    r:3.5+Math.random()*5,d:1.5+Math.random()*2.5,
+    color:cols[Math.floor(Math.random()*cols.length)],
+    tilt:Math.random()*10-5,ts:.05+Math.random()*.07
+  }));
+  let fr=0;
+  function draw(){
+    if(fr>260){ctx.clearRect(0,0,c.width,c.height);return;}
+    ctx.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{
+      ctx.beginPath();
+      ctx.ellipse(p.x,p.y,p.r,p.r*.45,p.tilt,0,Math.PI*2);
+      ctx.fillStyle=p.color;
+      ctx.globalAlpha=Math.max(0,1-fr/205);
+      ctx.fill();
+      p.y+=p.d;p.x+=Math.sin(fr*.05+p.tilt)*.75;p.tilt+=p.ts;
+    });
+    ctx.globalAlpha=1;fr++;
+    requestAnimationFrame(draw);
+  }
+  draw();
 }
 </script>
 </body>
