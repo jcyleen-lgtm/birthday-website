@@ -249,6 +249,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 
 #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
 
+/* ═══ SOFT GLOW ORBS ═══ */
+.glow-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.glow-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(70px);
+  opacity:0;
+  animation:orbFloat var(--dur,18s) var(--delay,0s) ease-in-out infinite;
+}
+
+/* ═══ GLITTER STARS ═══ */
+.glitter-star{
+  position:absolute;
+  pointer-events:none;
+  width:var(--sz,3px);
+  height:var(--sz,3px);
+  border-radius:50%;
+  background:white;
+  animation:
+    glitterTwinkle var(--td,3s) var(--delay,0s) ease-in-out infinite,
+    glitterDrift var(--mv,12s) var(--delay,0s) ease-in-out infinite;
+}
+/* cross/plus shape for bigger glitter stars */
+.glitter-star.cross::before,
+.glitter-star.cross::after{
+  content:'';position:absolute;
+  background:inherit;
+  border-radius:2px;
+}
+.glitter-star.cross::before{
+  width:1px;height:calc(var(--sz,3px)*2.5);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.glitter-star.cross::after{
+  width:calc(var(--sz,3px)*2.5);height:1px;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+
 /* ═══ KEYFRAMES ═══ */
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 @keyframes twinkle{0%,100%{opacity:0;transform:scale(0.4)}50%{opacity:var(--op,.4);transform:scale(1)}}
@@ -256,6 +294,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 @keyframes sparkPop{0%{opacity:0;transform:translate(0,0) scale(0.3)}45%{opacity:1;transform:translate(var(--tx),var(--ty)) scale(1.2)}100%{opacity:0;transform:translate(var(--tx),calc(var(--ty) - 9px)) scale(0.5)}}
 @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.14)}100%{transform:scale(1)}}
 .pop-anim{animation:pop 0.32s ease}
+
+@keyframes orbFloat{
+  0%{opacity:0;transform:translate(0,0) scale(1);}
+  15%{opacity:var(--op,0.07);}
+  50%{opacity:var(--op,0.12);transform:translate(var(--tx,30px),var(--ty,-40px)) scale(1.15);}
+  85%{opacity:var(--op,0.07);}
+  100%{opacity:0;transform:translate(var(--tx2,10px),var(--ty2,20px)) scale(0.9);}
+}
+@keyframes glitterTwinkle{
+  0%,100%{opacity:0;transform:scale(0.2);}
+  30%,70%{opacity:var(--op,0.9);transform:scale(1);}
+  50%{opacity:1;transform:scale(1.3);}
+}
+@keyframes glitterDrift{
+  0%,100%{margin-top:0;}
+  50%{margin-top:var(--drift,8px);}
+}
 </style>
 </head>
 <body>
@@ -263,6 +318,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 
 <!-- ═══ P1 ENVELOPE ═══ -->
 <div class="page active" id="p-envelope">
+  <div class="glow-layer" id="gl1"></div>
   <div class="star-field" id="sf1"></div>
 
   <div class="env-scene" id="envScene">
@@ -475,17 +531,84 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 </div>
 
 <script>
-/* ── Stars ── */
+/* ── Stars + Glitter + Glow ── */
 function makeStars(id,n){
   const c=document.getElementById(id);if(!c)return;
+
+  // ── Soft glow orbs ──
+  const glowColors=[
+    'rgba(74,127,212,VAR)','rgba(36,80,154,VAR)','rgba(200,168,75,VAR)',
+    'rgba(184,208,238,VAR)','rgba(27,58,107,VAR)'
+  ];
+  for(let i=0;i<4;i++){
+    const orb=document.createElement('div');
+    const col=glowColors[i%glowColors.length];
+    const op=(0.08+Math.random()*0.1).toFixed(2);
+    const sz=140+Math.random()*200;
+    const tx=(-60+Math.random()*120).toFixed(0);
+    const ty=(-80+Math.random()*120).toFixed(0);
+    const tx2=(-30+Math.random()*60).toFixed(0);
+    const ty2=(-40+Math.random()*60).toFixed(0);
+    const dur=(14+Math.random()*12).toFixed(1);
+    const delay=(Math.random()*8).toFixed(1);
+    orb.style.cssText=`
+      position:absolute;border-radius:50%;pointer-events:none;
+      width:${sz}px;height:${sz}px;
+      top:${10+Math.random()*70}%;left:${5+Math.random()*80}%;
+      background:radial-gradient(circle,${col.replace('VAR','0.55')} 0%,${col.replace('VAR','0')} 70%);
+      --dur:${dur}s;--delay:${delay}s;
+      --tx:${tx}px;--ty:${ty}px;--tx2:${tx2}px;--ty2:${ty2}px;
+      --op:${op};
+      animation:orbFloat ${dur}s ${delay}s ease-in-out infinite;
+      z-index:0;
+    `;
+    c.appendChild(orb);
+  }
+
+  // ── Regular twinkling stars ──
   for(let i=0;i<n;i++){
     const s=document.createElement('div');
-    const sz=0.8+Math.random()*2;
-    s.style.cssText=`position:absolute;border-radius:50%;background:#fff;width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation:twinkle ${2.5+Math.random()*4}s ${Math.random()*4}s ease-in-out infinite;--op:${0.15+Math.random()*0.45};`;
+    const sz=0.7+Math.random()*1.8;
+    const isBright=Math.random()<0.25;
+    s.style.cssText=`
+      position:absolute;border-radius:50%;
+      background:${isBright?'#fff':'rgba(184,208,238,0.8)'};
+      width:${sz}px;height:${sz}px;
+      top:${Math.random()*100}%;left:${Math.random()*100}%;
+      animation:twinkle ${2.5+Math.random()*4}s ${Math.random()*5}s ease-in-out infinite;
+      --op:${0.2+Math.random()*0.5};
+      box-shadow:${isBright?`0 0 ${2+Math.random()*4}px rgba(184,208,238,0.6)`:'none'};
+      z-index:1;
+    `;
     c.appendChild(s);
   }
+
+  // ── Glitter stars (sparkly cross-shaped) ──
+  const glitterCount=18+Math.floor(Math.random()*10);
+  for(let i=0;i<glitterCount;i++){
+    const g=document.createElement('div');
+    const isCross=Math.random()<0.4;
+    const sz=isCross?(1.5+Math.random()*2):(1+Math.random()*1.5);
+    const colors=['255,255,255','184,208,238','230,201,106','200,168,75','176,196,222'];
+    const col=colors[Math.floor(Math.random()*colors.length)];
+    const op=(0.5+Math.random()*0.5).toFixed(2);
+    const td=(1.5+Math.random()*3).toFixed(1);
+    const mv=(8+Math.random()*10).toFixed(1);
+    const drift=(-(4)+Math.random()*8).toFixed(0);
+    const delay=(Math.random()*6).toFixed(2);
+    g.className='glitter-star'+(isCross?' cross':'');
+    g.style.cssText=`
+      top:${Math.random()*100}%;left:${Math.random()*100}%;
+      --sz:${sz}px;--op:${op};--td:${td}s;--mv:${mv}s;
+      --drift:${drift}px;--delay:${delay}s;
+      background:rgba(${col},${op});
+      box-shadow:0 0 ${isCross?4:2}px ${isCross?3:1}px rgba(${col},0.4);
+      z-index:2;
+    `;
+    c.appendChild(g);
+  }
 }
-['sf1','sf2','sf3','sf4','sf5','sf6'].forEach(id=>makeStars(id,50));
+['sf1','sf2','sf3','sf4','sf5','sf6'].forEach(id=>makeStars(id,45));
 
 /* ── Navigation ── */
 function goTo(id){
