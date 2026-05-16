@@ -205,27 +205,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 .g6 .bow-fill{fill:#B8D0EE}.g6 .bow-center{fill:#7A9CC4}
 .reset-link{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;display:block;margin:0.4rem auto 0;}
 
-/* ═══ PHOTOBOOTH ═══ */
-.booth-wrap{display:flex;flex-direction:column;align-items:center;margin-top:1.2rem;}
-.printer{width:210px;height:54px;background:linear-gradient(to bottom,#1A2848,#121E3C);border-radius:11px;box-shadow:0 5px 18px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;position:relative;z-index:5;}
-.printer-slot{width:155px;height:6px;background:#050D1C;border-radius:3px;box-shadow:inset 0 2px 5px rgba(0,0,0,0.9);}
-.printer-led{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;background:var(--sky);box-shadow:0 0 7px var(--sky);animation:ledBlink 2s ease-in-out infinite;}
-.film-output{width:182px;max-height:0;overflow:hidden;background:#0A0A0A;border-radius:0 0 4px 4px;position:relative;z-index:4;}
-.film-strip{width:182px;background:#0A0A0A;position:relative;}
-.film-strip::before,.film-strip::after{content:'';position:absolute;top:0;bottom:0;width:8px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 5px,#060606 5px,#060606 10px,transparent 10px,transparent 16px);z-index:5;}
-.film-strip::before{left:0}.film-strip::after{right:0}
-.film-frame{width:calc(100% - 16px);margin:0 8px 3px;aspect-ratio:4/3;overflow:hidden;border:1.5px solid #141414;}
-.film-frame:first-child{margin-top:3px;}
-.frame-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:center;padding:0.4rem;}
-.fp1{background:linear-gradient(135deg,#1E3A6E,#0A1628)}
-.fp2{background:linear-gradient(135deg,#162847,#1E3A6E)}
-.fp3{background:linear-gradient(135deg,#0F1F3D,#2952A3)}
-.fp4{background:linear-gradient(135deg,#162847,#0A1628)}
-.film-foot{padding:5px 8px 7px;display:flex;justify-content:space-between;align-items:center;}
-.film-foot-label{font-family:'DM Sans',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.3);letter-spacing:0.08em;}
-.film-foot-stamp{font-family:'Pinyon Script',cursive;font-size:1rem;color:var(--gold);transform:rotate(-5deg);}
-.print-btn{margin-top:0.9rem;background:transparent;border:1px solid rgba(184,208,238,0.22);border-radius:2px;padding:0.5rem 1.4rem;font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.2s;}
-.print-btn:hover{border-color:var(--sky);color:var(--ice);}
+
 
 /* ═══ CAKE ═══ */
 .cake-wrap{cursor:pointer;display:inline-block;filter:drop-shadow(0 8px 28px rgba(74,127,212,0.22));transition:transform 0.2s,filter 0.2s;margin:1.2rem 0 0.4rem;}
@@ -300,7 +280,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
           <div class="lc-inner">
             <p class="lc-from">To the one I love most</p>
             <p class="lc-title">Happy <em>Birthday</em></p>
-            <p class="lc-name">my love</p>
+            <p class="lc-name">Edrick</p>
             <div class="lc-rule"></div>
             <p class="lc-wish">
               May this year carry you gently —<br>
@@ -353,7 +333,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
   <div class="pg-inner">
     <span class="pg-label">just for you</span>
     <p class="pg-title">Happy<br><em>Birthday</em></p>
-    <p class="pg-script" style="margin-top:0.4rem;">my love</p>
+    <p class="pg-script" style="margin-top:0.4rem;">Edrick</p>
     <div id="heroCandles" style="margin:1.5rem 0;display:flex;gap:0.9rem;justify-content:center;"></div>
     <button class="nav-btn" onclick="goTo('p-letter')">A little note</button>
   </div>
@@ -380,40 +360,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
     <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--muted);margin-top:0.3rem;">tap each gift to unwrap</p>
     <div class="gifts-grid" id="giftsGrid"></div>
     <button class="reset-link" onclick="resetGifts()">wrap them back up</button>
-    <button class="nav-btn" onclick="goTo('p-booth')">Our little moments</button>
+    <button class="nav-btn" onclick="goTo('p-cake')">Make a wish</button>
   </div>
 </div>
 
-<!-- ═══ P5 PHOTOBOOTH ═══ -->
-<div class="page" id="p-booth" style="background:var(--navy2);">
-  <div style="text-align:center;max-width:480px;width:90%;z-index:2;">
-    <span class="pg-label">our little moments</span>
-    <h2 class="pg-title" style="font-size:clamp(1.8rem,5vw,2.8rem);">The <em>photobooth</em></h2>
-    <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.9rem;color:var(--muted);margin-top:0.25rem;">I'm really glad you exist and came into my life</p>
-    <div class="booth-wrap">
-      <div class="printer">
-        <div class="printer-slot"></div>
-        <div class="printer-led"></div>
-      </div>
-      <div class="film-output" id="filmOutput">
-        <div class="film-strip" id="filmStrip">
-          <div class="film-frame"><div class="frame-ph fp1">add your photo</div></div>
-          <div class="film-frame"><div class="frame-ph fp2">add your photo</div></div>
-          <div class="film-frame"><div class="frame-ph fp3">add your photo</div></div>
-          <div class="film-frame"><div class="frame-ph fp4">add your photo</div></div>
-          <div class="film-foot">
-            <span class="film-foot-label">PHOTO DUMP</span>
-            <span class="film-foot-stamp">us</span>
-          </div>
-        </div>
-      </div>
-      <button class="print-btn" id="printBtn" onclick="printFilm()">print photos</button>
-    </div>
-    <button class="nav-btn" onclick="goTo('p-cake')" style="margin-top:0.8rem;">Make a wish</button>
-  </div>
-</div>
 
-<!-- ═══ P6 CAKE ═══ -->
+<!-- ═══ P5 CAKE ═══ -->
 <div class="page" id="p-cake" style="background:var(--navy);">
   <div class="star-field" id="sf4"></div>
   <div class="pg-inner">
@@ -503,7 +455,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 <div class="page" id="p-close" style="background:var(--navy);">
   <div class="star-field" id="sf6"></div>
   <div style="text-align:center;z-index:2;">
-    <p class="pg-sig" style="font-size:1.6rem;margin-bottom:1.4rem;">Happy Birthday, love.</p>
+    <p class="pg-sig" style="font-size:1.6rem;margin-bottom:1.4rem;">Happy Birthday, Edrick.</p>
     <div class="close-env" id="closeEnv" onclick="sealLetter()">
       <div class="close-env-body">
         <div class="cfl"></div><div class="cfr"></div><div class="cfb"></div>
@@ -605,30 +557,8 @@ document.getElementById('giftsGrid').innerHTML=wishes.map((w,i)=>buildGift(w,i))
 function openGift(i){const el=document.getElementById('gift'+i);if(!el.classList.contains('opened'))el.classList.add('opened');}
 function resetGifts(){wishes.forEach((_,i)=>document.getElementById('gift'+i).classList.remove('opened'));}
 
-/* ── Photobooth ── */
-let printed=false;
-function printFilm(){
-  if(printed)return; printed=true;
-  const output=document.getElementById('filmOutput');
-  const strip=document.getElementById('filmStrip');
-  const btn=document.getElementById('printBtn');
-  btn.textContent='printing...';btn.style.opacity='0.4';btn.style.cursor='default';
-  const totalH=strip.offsetHeight;
-  const frameH=totalH/5;
-  const steps=[frameH,frameH*2,frameH*3,frameH*4,totalH];
-  let si=0;
-  function feedNext(){
-    if(si>=steps.length)return;
-    output.style.transition=`max-height 1.8s cubic-bezier(0.25,0.6,0.25,1)`;
-    output.style.maxHeight=steps[si]+'px';
-    si++;
-    if(si<steps.length)setTimeout(feedNext,2200);
-  }
-  setTimeout(feedNext,300);
-}
-
 /* ── Cake ── */
-const cmsgs=["Make a wish","Wish sent","The stars heard you","Happy Birthday, love"];
+const cmsgs=["Make a wish","Wish sent","The stars heard you","Happy Birthday, Edrick"];
 let blown=false,ci=0;
 function blowCandles(){
   const btn=document.getElementById('cakeBtn');
